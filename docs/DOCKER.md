@@ -1,7 +1,7 @@
 # [DOCKER] Teacher Schedule Bot (WIP)
 
 <h4 align="center">
-  v0.0.3 by Lev Nalimov (@dsfpw)
+  v0.0.4 by Lev Nalimov (@dsfpw)
 </h4>
 
 
