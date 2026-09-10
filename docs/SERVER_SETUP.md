@@ -442,7 +442,7 @@ systemctl status nginx
 Проверить контейнер:
 
 ```bash
-docker compose ps
+docker compose -f docker-compose.server.yml ps
 ```
 
 Проверить локальный endpoint:
@@ -454,7 +454,7 @@ curl http://127.0.0.1:8080/health
 Проверить HTTPS:
 
 ```bash
-curl https://cdt.imdelux.xyz/health
+curl https://ВАШ_ДОМЕН/health
 ```
 
 </details>
@@ -469,7 +469,7 @@ curl https://cdt.imdelux.xyz/health
 /opt/teacher-bot/
 │
 ├── .env
-├── docker-compose.yml
+├── docker-compose.server.yml
 ├── teacher-bot-cdt-v0.0.1.tar
 │
 └── data/
