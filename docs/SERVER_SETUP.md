@@ -202,7 +202,7 @@ docker compose -f docker-compose.server.yml up -d
 Проверить состояние:
 
 ```bash
-docker compose ps
+docker compose -f docker-compose.server.yml ps
 ```
 
 Ожидается:
@@ -217,7 +217,7 @@ teacher-bot-cdt    Up
 ### 9. Проверить логи
 
 ```bash
-docker compose logs -f
+docker compose -f docker-compose.server.yml logs -f
 ```
 
 Для выхода из просмотра логов:
