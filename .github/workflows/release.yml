@@ -36,15 +36,15 @@ jobs:
       - name: Build Docker image
         run: |
           docker build \
-            -t teacher-bot:${{ steps.version.outputs.version }} \
-            -t teacher-bot:latest \
+            -t teacher-bot-cdt:${{ steps.version.outputs.version }} \
+            -t teacher-bot-cdt:latest \
             .
 
       - name: Export Docker image
         run: |
           docker save \
-            teacher-bot:${{ steps.version.outputs.version }} \
-            -o teacher-bot-v${{ steps.version.outputs.version }}.tar
+            teacher-bot-cdt:${{ steps.version.outputs.version }} \
+            -o teacher-bot-cdt-v${{ steps.version.outputs.version }}.tar
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
