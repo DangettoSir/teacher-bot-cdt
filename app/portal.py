@@ -1,4 +1,5 @@
 import asyncio
+import json
 from http.cookies import SimpleCookie
 from typing import Any
 
@@ -52,9 +53,6 @@ class TeacherPortal:
             flush=True,
         )
 
-        # ВАЖНО:
-        # portal session cookie содержит / + =
-        # Не даём aiohttp экранировать значение cookie.
         self.session = aiohttp.ClientSession(
             timeout=aiohttp.ClientTimeout(total=timeout),
             cookie_jar=aiohttp.CookieJar(quote_cookie=False),
@@ -149,6 +147,7 @@ class TeacherPortal:
                 BASE_URL,
                 allow_redirects=True,
             ) as response:
+
                 print(
                     "[PORTAL] AVAILABILITY RESPONSE: "
                     f"status={response.status} "
@@ -163,11 +162,13 @@ class TeacherPortal:
             aiohttp.ClientError,
             asyncio.TimeoutError,
         ) as error:
+
             print(
                 "[PORTAL] AVAILABILITY ERROR: "
                 f"{type(error).__name__}: {error}",
                 flush=True,
             )
+
             return False
 
     async def login_portal(self) -> str:
@@ -214,7 +215,7 @@ class TeacherPortal:
                 )
 
                 print(
-                    f"[PORTAL] LOGIN SET-COOKIE COUNT: "
+                    "[PORTAL] LOGIN SET-COOKIE COUNT: "
                     f"{len(set_cookies)}",
                     flush=True,
                 )
@@ -224,15 +225,16 @@ class TeacherPortal:
 
                     if "session=" in cookie_preview:
                         prefix, rest = cookie_preview.split(
-                            "session=", 1
+                            "session=",
+                            1,
                         )
 
-                        cookie_value = rest.split(";", 1)[0]
-
                         cookie_preview = (
-                            prefix + "session=***"
+                            prefix
+                            + "session=***"
                             + (
-                                ";" + rest.split(";", 1)[1]
+                                ";"
+                                + rest.split(";", 1)[1]
                                 if ";" in rest
                                 else ""
                             )
@@ -292,6 +294,7 @@ class TeacherPortal:
             aiohttp.ClientError,
             asyncio.TimeoutError,
         ) as error:
+
             print(
                 "[PORTAL] LOGIN NETWORK ERROR: "
                 f"{type(error).__name__}: {error}",
@@ -325,9 +328,6 @@ class TeacherPortal:
             )
 
             try:
-                # Cookie берётся из CookieJar.
-                # quote_cookie=False гарантирует отправку
-                # session-значения без экранирования.
                 response = await self.session.request(
                     method,
                     url,
@@ -345,6 +345,7 @@ class TeacherPortal:
                 aiohttp.ClientError,
                 asyncio.TimeoutError,
             ) as error:
+
                 raise PortalUnavailableError(
                     "Portal unavailable"
                 ) from error
@@ -353,7 +354,8 @@ class TeacherPortal:
                 "[PORTAL] RESPONSE: "
                 f"status={response.status} "
                 f"url={response.url} "
-                f"location={response.headers.get('Location')!r}",
+                f"location={response.headers.get('Location')!r} "
+                f"content_type={response.headers.get('Content-Type')!r}",
                 flush=True,
             )
 
@@ -421,6 +423,26 @@ class TeacherPortal:
 
         raise PortalError("Request failed")
 
+    async def _json_response(
+        self,
+        response: aiohttp.ClientResponse,
+    ) -> Any:
+
+        try:
+            text = await response.text()
+
+            try:
+                return json.loads(text)
+
+            except json.JSONDecodeError as error:
+                raise PortalError(
+                    "Portal API returned invalid JSON: "
+                    f"{text[:300]!r}"
+                ) from error
+
+        finally:
+            response.release()
+
     async def get_schedule(
         self,
         teacher_uid: str,
@@ -444,26 +466,14 @@ class TeacherPortal:
             },
         )
 
-        try:
-            data = await response.json()
+        data = await self._json_response(response)
 
-            if not isinstance(data, list):
-                raise PortalError(
-                    "Schedule API returned invalid data"
-                )
-
-            return data
-
-        except aiohttp.ContentTypeError as error:
-            text = await response.text()
-
+        if not isinstance(data, list):
             raise PortalError(
-                "Schedule API returned non-JSON body: "
-                f"{text[:200]!r}"
-            ) from error
+                "Schedule API returned invalid data"
+            )
 
-        finally:
-            response.release()
+        return data
 
     async def get_teacher_list(self) -> dict:
         response = await self._request(
@@ -471,18 +481,14 @@ class TeacherPortal:
             "/internal/teacherList.php",
         )
 
-        try:
-            data = await response.json()
+        data = await self._json_response(response)
 
-            if not isinstance(data, dict):
-                raise PortalError(
-                    "Teacher list API returned invalid data"
-                )
+        if not isinstance(data, dict):
+            raise PortalError(
+                "Teacher list API returned invalid data"
+            )
 
-            return data
-
-        finally:
-            response.release()
+        return data
 
     async def get_static_events(self) -> list[dict]:
         response = await self._request(
@@ -490,18 +496,14 @@ class TeacherPortal:
             "/internal/static.json",
         )
 
-        try:
-            data = await response.json()
+        data = await self._json_response(response)
 
-            if not isinstance(data, list):
-                raise PortalError(
-                    "Static events API returned invalid data"
-                )
+        if not isinstance(data, list):
+            raise PortalError(
+                "Static events API returned invalid data"
+            )
 
-            return data
-
-        finally:
-            response.release()
+        return data
 
     async def get_teacher_info(self) -> dict:
         response = await self._request(
@@ -509,18 +511,14 @@ class TeacherPortal:
             "/internal/teacherInfo.php",
         )
 
-        try:
-            data = await response.json()
+        data = await self._json_response(response)
 
-            if not isinstance(data, dict):
-                raise PortalError(
-                    "Teacher info API returned invalid data"
-                )
+        if not isinstance(data, dict):
+            raise PortalError(
+                "Teacher info API returned invalid data"
+            )
 
-            return data
-
-        finally:
-            response.release()
+        return data
 
     async def get_attendance(
         self,
@@ -539,18 +537,14 @@ class TeacherPortal:
             },
         )
 
-        try:
-            data = await response.json()
+        data = await self._json_response(response)
 
-            if not isinstance(data, list):
-                raise PortalError(
-                    "Attendance API returned invalid data"
-                )
+        if not isinstance(data, list):
+            raise PortalError(
+                "Attendance API returned invalid data"
+            )
 
-            return data
-
-        finally:
-            response.release()
+        return data
 
     async def register_attendance(
         self,
@@ -571,11 +565,10 @@ class TeacherPortal:
             },
         )
 
-        try:
-            try:
-                return await response.json()
-            except aiohttp.ContentTypeError:
-                return await response.text()
+        text = await response.text()
+        response.release()
 
-        finally:
-            response.release()
+        try:
+            return json.loads(text)
+        except json.JSONDecodeError:
+            return text
