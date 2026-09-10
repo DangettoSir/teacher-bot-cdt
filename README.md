@@ -158,4 +158,5 @@ NOTIFICATION_RETRY_INTERVAL=30
 ## Дополнительные материалы
 
 * [DOCKER](./docs/DOCKER.md) — про Docker Image (WIP)
+* [SERVER_SETUP](./docs/SERVER_SETUP.md) — про готовую серверную установку (WIP)
 * [TODO...](https://www.youtube.com/watch?v=dQw4w9WgXcQ)
