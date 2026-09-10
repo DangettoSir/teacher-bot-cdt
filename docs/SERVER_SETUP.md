@@ -1,7 +1,7 @@
 # [SERVER_SETUP] Teacher Schedule Bot (WIP)
 
 <h4 align="center">
-  v0.0.2 by Lev Nalimov (@dsfpw)
+  v0.0.3 by Lev Nalimov (@dsfpw)
 </h4>
 
 

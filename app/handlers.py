@@ -123,7 +123,6 @@ async def password_received(
 ):
     password = message.text or ""
 
-    # Удаляем сообщение с паролем.
     try:
         await message.delete()
     except Exception:
@@ -194,7 +193,9 @@ async def password_received(
             "Попробуйте снова через /start."
         )
 
-    except Exception:
+    except Exception as e:
+        print(f"PORTAL ERROR: {type(e).__name__}: {e}", flush=True)
+
         await message.answer(
             "Не удалось подключиться "
             "к порталу. Попробуйте позже."
