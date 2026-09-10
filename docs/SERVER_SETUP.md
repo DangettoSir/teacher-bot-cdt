@@ -130,7 +130,7 @@ nano .env
 ```env
 BOT_TOKEN=YOUR_TELEGRAM_BOT_TOKEN
 
-WEBHOOK_BASE_URL=https://cdt.imdelux.xyz
+WEBHOOK_BASE_URL=https://ВАШ_ДОМЕН
 WEBHOOK_PATH=/telegram/webhook
 WEBHOOK_SECRET=YOUR_WEBHOOK_SECRET
 
@@ -196,7 +196,7 @@ image: teacher-bot-cdt:0.0.2
 
 ```bash
 mkdir -p data
-docker compose up -d
+docker compose -f docker-compose.server.yml up -d
 ```
 
 Проверить состояние:
